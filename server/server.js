@@ -16,14 +16,6 @@
 
   const uri = "mongodb+srv://devs:devs@cluster1.bndl44b.mongodb.net/?retryWrites=true&w=majority";
 
-  // const client = new MongoClient(uri, {
-  //   serverApi: {
-  //     version: ServerApiVersion.v1,
-  //     strict: true,
-  //     deprecationErrors: true,
-  //   }
-  // });
-
   mongoose.connect(uri, {})
     .then(()=>{
       console.log("Connected to the database");
@@ -42,14 +34,14 @@
 
   app.post('/hashAndStore', async (req, res) => {
     const { combinedString, passward } = req.body;
-    const id_pass = combinedString+ passward;
+    const id_pass = combinedString + passward;
 
     try {
       const myIdentity = new driver.Ed25519Keypair();
       const myIdentity1 = new driver.Ed25519Keypair();
       const conn = new driver.Connection('http://localhost:9984/api/v1/');
-      const hash = crypto.createHash('sha256').update(combinedString).digest('hex');
-      const hash1 = crypto.createHash('sha256').update(id_pass).digest('hex');
+      const hash = crypto.createHash('sha256').update(id_pass).digest('hex');
+      const hash1 = crypto.createHash('sha256').update(combinedString).digest('hex');
 
 
       // Search asset
@@ -65,6 +57,7 @@
 
         if (hashExists) {
           console.log(`Hash ${hashToCheck} exists in BigchainDB assets.`);
+          console.log(hash1);
         } 
         else {
           
@@ -72,7 +65,7 @@
 
           // string hash of voter id
           const tx = driver.Transaction.makeCreateTransaction(
-            { name: 'votes', deVID: hash, party:"0001", },
+            { name: 'vidDone', deVID: hash,},
             null,
             [ driver.Transaction.makeOutput(
               driver.Transaction.makeEd25519Condition(myIdentity.publicKey)
@@ -86,11 +79,9 @@
           // Return success response
           res.json({ success: true, hash });
 
-
-
           // storing hash of passward and id          
           const tx1 = driver.Transaction.makeCreateTransaction(
-            { name: 'hashedVidPin', deVID: hash1, party:"0001", },
+            { name: 'hashedVidPin', deVID: hash1,},
             null,
             [ driver.Transaction.makeOutput(
               driver.Transaction.makeEd25519Condition(myIdentity1.publicKey)
@@ -116,7 +107,64 @@
   });
 
 
-  
+  app.post('/Logging', async (req, res) => {
+
+    const { combinedString, passward } = req.body;
+    const id_pass = combinedString+ passward;
+    const hash = crypto.createHash('sha256').update(id_pass).digest('hex');
+    const hash1 = crypto.createHash('sha256').update(combinedString).digest('hex');
+    let flag1=0;
+    let flag2=0;
+
+    try {
+      const conn = new driver.Connection('http://localhost:9984/api/v1/');
+
+      // Search asset
+      await conn.searchAssets('vidDone').then(async assets => {
+
+        let hashToCheck = hash; // Replace with the hash you want to check
+
+        // Iterate over the returned assets to find the hash
+        let hashExists = assets.some(asset => {
+          return asset.data.deVID == hashToCheck; // Assuming 'deVID' is the attribute storing the hash
+        });
+
+        if (hashExists) {
+          flag1=1;
+        } 
+
+      });
+
+      await conn.searchAssets('hashedVidPin').then(async assets => {
+        let hashToCheck = hash1; // Replace with the hash you want to check
+
+        // Iterate over the returned assets to find the hash
+        let hashExists = assets.some(asset => {
+          return asset.data.deVID == hashToCheck; // Assuming 'deVID' is the attribute storing the hash
+        });
+
+        if (hashExists) {
+          flag2=1;
+        }
+        if(flag1 && flag2){
+          console.log("able to login now");
+        }
+        else{
+          console.log("not able to login now", flag1, flag2);
+          // console.log(hash);
+          // console.log(hash1);
+        } 
+      });
+
+      
+      
+      
+    } catch (error) {
+      console.error("Error hashing and storing data:", error);
+      res.status(500).json({ success: false, message: "Error hashing and storing data." });
+    }
+
+  });
   
 
 
@@ -135,30 +183,6 @@
   app.get('/', (req, res) => {
     res.send('Hello from Express and MongoDB!');
   });
-
-  app.get('/getAllData', async (req, res) => {
-    
-      // Connect to the MongoDB collection
-      // const collection = client.db("ECL_DATA").collection("ECL_VOTER_DATA");
-
-      
-      // Find all documents in the collection
-      // const data = await collection.find({}).toArray();
-
-      allVid.find({})
-        .then(users=>{
-          console.log(users);
-          res.json(users);
-        })
-        .catch(err=>{
-          console.log("Error feching the users",err);
-          res.status(500).json({ message: "Error fetching data" });
-        })
-
-      // Log the data to the console
-
-  });
-
 
 
   app.get('/getDataByVoterId/:voterId', async (req, res) => {
@@ -196,27 +220,7 @@
   });
 
 
-  // Check if a user exists by username
-  app.post('/checkUser', async (req, res) => {
-    try {
-      const username = req.body.username;
-
-      if (!username) {
-        return res.status(400).json({ message: 'Username is required' });
-      }
-
-      const user = await allVid.find({ voter_id: username });
-
-      if (user) {
-        return res.status(200).json({ message: 'User exists' });
-      } else {
-        return res.status(404).json({ message: 'User not found' });
-      }
-    } catch (error) {
-      console.error("Error checking user:", error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  });
+  
 }
 catch(err){
   mongoose.connection.close();
