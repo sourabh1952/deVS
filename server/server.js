@@ -122,7 +122,7 @@
       // Search asset
       await conn.searchAssets('vidDone').then(async assets => {
 
-        let hashToCheck = hash; // Replace with the hash you want to check
+        let hashToCheck = hash1; // Replace with the hash you want to check
 
         // Iterate over the returned assets to find the hash
         let hashExists = assets.some(asset => {
@@ -146,20 +146,23 @@
         if (hashExists) {
           flag2=1;
         }
+        
+
         if(flag1 && flag2){
-          console.log("able to login now");
+          res.send(200).json({msg: "Login successful"});
+        }
+        else if(flag1){
+          res.send(401).json({msg: "Wrong PIN"});
         }
         else{
-          console.log("not able to login now", flag1, flag2);
-          // console.log(hash);
-          // console.log(hash1);
+          res.send(404).json({msg: "Please create a decentralised VID first!"});
         } 
       });
 
       
     } catch (error) {
       console.error("Error hashing and storing data:", error);
-      res.status(500).json({ success: false, message: "Error hashing and storing data." });
+      res.status(500).json({ msg:"Error hashing and storing data." });
     }
 
   });
@@ -189,7 +192,7 @@
           return asset.data.deVID === hashToCheck; // Assuming 'deVID' is the attribute storing the hash
         });
         if (hashExists) {
-          console.log(`Hash ${hashToCheck} you already voted for BJP`);
+          console.log(`Hash ${hashToCheck} you already voted`);
         } 
         else {
 
