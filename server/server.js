@@ -77,7 +77,7 @@
           // Send it to the network
           await conn.postTransactionCommit(txSigned);
           // Return success response
-          res.json({ success: true, hash });
+          // res.json({ success: true, hash });
 
           // storing hash of passward and id          
           const tx1 = driver.Transaction.makeCreateTransaction(
@@ -157,28 +157,87 @@
       });
 
       
-      
-      
     } catch (error) {
       console.error("Error hashing and storing data:", error);
       res.status(500).json({ success: false, message: "Error hashing and storing data." });
     }
 
   });
+
+
+  // voting started bro
+
+  app.post('/Voting_Check', async (req, res) => {
+    const { voterid, passward, party } = req.body;
+    const id_pass = voterid + passward ;
+    const validate_user = voterid;
+
+    try {
+      const myIdentity = new driver.Ed25519Keypair();
+      const myIdentity1 = new driver.Ed25519Keypair();
+      const conn = new driver.Connection('http://localhost:9984/api/v1/');
+      const hash = crypto.createHash('sha256').update(id_pass).digest('hex');
+      const hash1 = crypto.createHash('sha256').update(validate_user).digest('hex');
+
+
+      // Search asset
+      conn.searchAssets('alreadyVoted').then(async assets => {
+
+        const hashToCheck = hash1; // Replace with the hash you want to check
+        // Iterate over the returned assets to find the hash
+        const hashExists = assets.some(asset => {
+          return asset.data.deVID === hashToCheck; // Assuming 'deVID' is the attribute storing the hash
+        });
+        if (hashExists) {
+          console.log(`Hash ${hashToCheck} you already voted for BJP`);
+        } 
+        else {
+
+          // string hash of voter id
+          const tx = driver.Transaction.makeCreateTransaction(
+            { name: 'alreadyVoted', deVID: hash1,},
+            null,
+            [ driver.Transaction.makeOutput(
+              driver.Transaction.makeEd25519Condition(myIdentity.publicKey)
+            )],
+            myIdentity.publicKey
+          );
+          // Sign the transaction
+          const txSigned = driver.Transaction.signTransaction(tx, myIdentity.privateKey);
+          // Send it to the network
+          await conn.postTransactionCommit(txSigned);
+          // Return success response
+          // res.json({ success: true, hash });
+
+          // storing hash of passward and id          
+          const tx1 = driver.Transaction.makeCreateTransaction(
+            { name: 'votes', deVID: hash, party : party,},
+            null,
+            [ driver.Transaction.makeOutput(
+              driver.Transaction.makeEd25519Condition(myIdentity1.publicKey)
+            )],
+            myIdentity1.publicKey
+          );
+          // Sign the transaction
+          const txSigned1 = driver.Transaction.signTransaction(tx1, myIdentity1.privateKey);
+          // Send it to the network
+          await conn.postTransactionCommit(txSigned1);
+          console.log("donevoting");
+
+        }
+
+      }).catch(err => {
+        console.log('Error searching assets:', err);
+      });
+      
+      
+    } catch (error) {
+      console.error("Error hashing and storing data:", error);
+      res.status(500).json({ success: false, message: "Error hashing and storing data." });
+    }
+  });
   
 
-
-  // async function connectToMongoDB() {
-  //   try {
-  //     await client.connect();
-  //     await client.db("ECL_DATA").command({ ping: 1 });
-  //     console.log("Pinged your deployment. Successfully connected to MongoDB Atlas!");
-  //   } catch (error) {
-  //     console.error("Error connecting to MongoDB Atlas:", error);
-  //   }
-  // }
-
-  // connectToMongoDB();
 
   app.get('/', (req, res) => {
     res.send('Hello from Express and MongoDB!');
