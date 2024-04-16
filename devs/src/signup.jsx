@@ -107,7 +107,7 @@ console.log(e);
 
       <div className='flex justify-center items-center h-full'>
         <div className='max-w-[400px] w-full mx-auto bg-white p-8' >
-          <h2 className='text-4xl font-bold text-center py-4'>BRAND.</h2>
+          <h2 className='text-4xl font-bold text-center py-4'>deVS</h2>
           <div className='flex flex-col mb-4'>
             <label>Voter ID</label>
             <input 

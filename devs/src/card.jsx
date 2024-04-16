@@ -13,25 +13,40 @@ export default function Card({vid,pin,party,val,curr_par,changeParty,pname,voteT
             pin:pin,
             party:party,
             }
-            const res = await axios.post("http://localhost:5001/vote",dataToSend);
-            if(res.status==1000){
-            toast.error('You have already voted', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+            axios.post("http://localhost:5001/vote",dataToSend)
+                .then(res=>{
+                    console.log(res)
+                if(res.status==200){
+                    toast.success('Succesfully voted', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,
+                      }
+                     )
+                    }
+                }
+            )
+            .catch(res=>{
+                console.log(res)
+                if(res.response.status==652){
+                    toast.error('You have already voted', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+                    }
+                
+                else{
+                    toast.error('Some internal error occured. Please try again', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+    
+                }
             }
-            else if(res.status==200){
-                toast.success('Succesfully voted', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+            )
 
             }
-            else{
-                toast.success('Some internal error occured. Please try again', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
-
-            }
-        }
+            
+        
         else{
             toast.error('Please fill in correctly', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
 
         }
+    }
 
-    };
+    
     
     return (
         
@@ -62,7 +77,7 @@ export default function Card({vid,pin,party,val,curr_par,changeParty,pname,voteT
                 <textarea
                 value={voteText}
                 onChange={handleTextareaChange}
-                placeholder={`Enter ${pname}`}
+                placeholder={`Enter '${pname}'`}
                 className="border"
                 />
                 
@@ -80,4 +95,5 @@ export default function Card({vid,pin,party,val,curr_par,changeParty,pname,voteT
     </div>
 
         )
-    };
+    
+};

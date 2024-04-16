@@ -43,9 +43,9 @@ connectToMongoDB();
 
   app.post('/signup', async (req, res) => {
     // res.status(200).json({msg:"h"});
-    console.log("signup");
+
     const { vid, pin } = req.body;
-    console.log(vid,pin);
+
     const id_pass = vid + pin;
 
     try {
@@ -53,7 +53,7 @@ connectToMongoDB();
       const result = await client.db("ECL_DATA").collection("ECL_VOTER_DATA").findOne({
         voter_id: vid
       });
-      console.log(result);
+      // console.log(result);
       if (result) {
         const myIdentity = new driver.Ed25519Keypair();
         const myIdentity1 = new driver.Ed25519Keypair();
@@ -63,9 +63,10 @@ connectToMongoDB();
 
 
         // Search asset
-        conn.searchAssets('vidDone').then(async assets => {
-
+        conn.searchAssets('vidDone_').then(async assets => {
+          // console.log(assets);
           const hashToCheck = hash; // Replace with the hash you want to check
+
 
           // Iterate over the returned assets to find the hash
           const hashExists = assets.some(asset => {
@@ -80,8 +81,9 @@ connectToMongoDB();
             // console.log(`Hash ${hashToCheck} does not exist in BigchainDB assets.`);
 
             // string hash of voter id
+
             const tx = driver.Transaction.makeCreateTransaction(
-              { name: 'vidDone', deVID: hash,},
+              { name: 'vidDone_', deVID: hash},
               null,
               [ driver.Transaction.makeOutput(
                 driver.Transaction.makeEd25519Condition(myIdentity.publicKey)
@@ -97,7 +99,7 @@ connectToMongoDB();
             
             // storing hash of passward and id          
             const tx1 = driver.Transaction.makeCreateTransaction(
-              { name: 'hashedVidPin', deVID: hash1,},
+              { name: 'hashedVidPin_', deVID: hash1,},
               null,
               [ driver.Transaction.makeOutput(
                 driver.Transaction.makeEd25519Condition(myIdentity1.publicKey)
@@ -108,6 +110,7 @@ connectToMongoDB();
             const txSigned1 = driver.Transaction.signTransaction(tx1, myIdentity1.privateKey);
             // Send it to the network
             await conn.postTransactionCommit(txSigned1);
+
             res.status(200).json({msg:"Account created successfully"})
           }
 
@@ -117,7 +120,7 @@ connectToMongoDB();
       }
       else{
         res.status(400).json({ msg: 'Invalid VID'});
-        console.log("Invalid VID");
+
       }
       
       
@@ -136,7 +139,7 @@ connectToMongoDB();
     const id_pass = vid+pin;
     const hashVidPin = crypto.createHash('sha256').update(id_pass).digest('hex');
     const hashVid = crypto.createHash('sha256').update(vid).digest('hex');
-    console.log(id_pass);
+
 
     let flag1=0;
     let flag2=0;
@@ -145,7 +148,7 @@ connectToMongoDB();
       const conn = new driver.Connection(big_uri);
   
       // Search asset
-      await conn.searchAssets('vidDone').then(async assets => {
+      await conn.searchAssets('vidDone_').then(async assets => {
   
         let hashToCheck = hashVid; // Replace with the hash you want to check
   
@@ -160,7 +163,7 @@ connectToMongoDB();
   
       });
   
-      await conn.searchAssets('hashedVidPin').then(async assets => {
+      await conn.searchAssets('hashedVidPin_').then(async assets => {
         let hashToCheck = hashVidPin; // Replace with the hash you want to check
         
         // Iterate over the returned assets to find the hash
@@ -200,7 +203,7 @@ connectToMongoDB();
     const { vid, pin, party } = req.body;
     const id_pass = vid + pin ;
     const validate_user = vid;
-    console.log(vid, pin, party);
+
     try {
       const myIdentity = new driver.Ed25519Keypair();
       const myIdentity1 = new driver.Ed25519Keypair();
@@ -210,21 +213,23 @@ connectToMongoDB();
   
   
       // Search asset
-      conn.searchAssets('alreadyVoted').then(async assets => {
+      conn.searchAssets('alreadyVoted_').then(async assets => {
   
         const hashToCheck = hashVid; // Replace with the hash you want to check
         // Iterate over the returned assets to find the hash
         const hashExists = assets.some(asset => {
           return asset.data.deVID === hashToCheck; // Assuming 'deVID' is the attribute storing the hash
         });
+
         if (hashExists) {
-          res.status(1000).json({msg: "alreadyVoted"});
+
+          res.status(652).json({msg: "alreadyVoted_"});
         } 
         else {
   
           // string hash of voter id
           const tx = driver.Transaction.makeCreateTransaction(
-            { name: 'alreadyVoted', deVID: hashVid,},
+            { name: 'alreadyVoted_', deVID: hashVid,},
             null,
             [ driver.Transaction.makeOutput(
               driver.Transaction.makeEd25519Condition(myIdentity.publicKey)
@@ -240,7 +245,7 @@ connectToMongoDB();
   
           // storing hash of pin and id          
           const tx1 = driver.Transaction.makeCreateTransaction(
-            { name: 'votes', deVID: hashVidPin, party : party,},
+            { name: 'votes_', deVID: hashVidPin, party : party,},
             null,
             [ driver.Transaction.makeOutput(
               driver.Transaction.makeEd25519Condition(myIdentity1.publicKey)

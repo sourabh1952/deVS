@@ -6,8 +6,8 @@ const conn = new driver.Connection('http://172.16.14.216:9984/api/v1/')
 
 // Create a new CREATE transaction (new output)
 // const tx = driver.Transaction.makeCreateTransaction(
-//     { name: 'My Asset', immutable_attr1: "bla bla" },
-//     { metadata1: "here goes", metadata2: "my metadata attributes"},
+//     { name: 'vidDone', deVID: "4f27b4142f233d52212549a8edd924fb344d9062a594f27b4142fd777fe7cba4bf53" },
+//     null,
 //     [ driver.Transaction.makeOutput(
 //     driver.Transaction.makeEd25519Condition(myIdentity.publicKey))],
 //     myIdentity.publicKey)
@@ -17,6 +17,6 @@ const conn = new driver.Connection('http://172.16.14.216:9984/api/v1/')
 //     conn.postTransactionCommit(txSigned)
 
 //Search asset
-conn.searchAssets('votes').then(assets => console.log('Found assets with name My asset:', assets))
+conn.searchAssets('alreadyVoted').then(assets => console.log('Found assets with name My asset:', assets))
 //Search metadata
 // conn.searchMetadata('here goes').then(metadata => console.log('Found asset metadata with metadata1 here goes:', metadata))
