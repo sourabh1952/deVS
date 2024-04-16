@@ -4,6 +4,8 @@ import axios from 'axios';
 import cont from "./context"
 import { Link, useNavigate } from 'react-router-dom';
 import { version } from 'react-dom';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+
 export default function Signin({vid,changeid}) {
   // let history = useHistory();
 
@@ -12,7 +14,8 @@ export default function Signin({vid,changeid}) {
 
   
   const [vid_, setVid_] = useState(""); 
-  const [pin_, setPin_] = useState(""); 
+  const [pin2_, setPin2_] = useState(""); 
+  const [pin1_, setPin1_] = useState(""); 
   const [result, setResult] = useState(""); 
   
 
@@ -41,20 +44,56 @@ console.log(e);
   } 
 
   function handleChangeId(e) { 
-    setVid_(e.target.vid_); 
+    setVid_(e.target.value); 
 
   }
-  function handleChangePin(e) { 
-    setPin_(e.target.vid_); 
+  function handleChangePin2(e) { 
+    setPin2_(e.target.value); 
+
+  }
+  function handleChangePin1(e) { 
+    setPin1_(e.target.value); 
 
   }
   
-  const sigupclick=async(vid_,pin_)=>{
+  const signupclick=async(vid_,pin1_)=>{
     try{
-      const response = await axios.get(`http://localhost:5001/getDataByVoterId/${vid_}`);
-      if (response.status==200){
-        const res_2 = await axios.post(`http://localhost:5000/hello`, )
+      const dataToSend={
+        vid:vid_,
+        pin:pin1_
       }
+      axios.post(`http://localhost:5001/signup`,dataToSend)
+        .then(response=>{
+      console.log('Response Code:', response.status);
+      console.log('Response Data:', response.data);
+      console.log("here")
+      console.log(response);
+
+      if (response.status==200){
+        toast.success('Account setup successfully', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+      }
+      
+    }).catch(response=>{
+      console.log(response);
+      if (response.status==500){
+        toast.error('Some internal error occured', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+      }
+      else if (response.status==400){
+        console.log("here")
+        toast.error('Invalid VID', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+      }
+      else if (response.status==401){
+        toast.error('Account already made. Please sign in', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+      }
+      else {
+        toast.error('Some internal error occured', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
+
+      }
+    })
     }
     catch(e){
       console.log(e);
@@ -75,16 +114,16 @@ console.log(e);
               className='border relative bg-gray-100 p-2' 
               type="text" 
               vid_={vid_} 
-              onInput={handleChangeId} 
+              onChange={handleChangeId} 
               placeholder='Enter Voter ID'
               />
           </div>
           <div className='flex flex-col mb-4'>
             <label>PIN</label>
             <input 
-              vid_={pin_}
+              vid_={pin1_}
               className='border relative bg-gray-100 p-2' 
-              onInput={handleChangeId} 
+              onChange={handleChangePin1} 
               type="password" 
               // hidden
               placeholder='Enter PIN'
@@ -94,16 +133,16 @@ console.log(e);
           <div className='flex flex-col '>
             <label>Retype PIN</label>
             <input 
-              vid_={pin_}
+              vid_={pin2_}
               className='border relative mt-[1px] bg-gray-100 p-2' 
-              onInput={handleChangeId} 
+              onInput={handleChangePin2} 
               type="password" 
               // hidden
               placeholder='Retype PIN'
 
             />
           </div>
-          <button onClick={()=>signupclick(vid_,pin_)} className='w-full py-3 mt-8 bg-indigo-600 hover:bg-indigo-500 relative text-white'>Sign up</button>
+          <button onClick={()=>signupclick(vid_,pin1_)} className='w-full py-3 mt-8 bg-indigo-600 hover:bg-indigo-500 relative text-white'>Sign up</button>
 
           <p className='text-center mt-8'>Already a member? <Link to="/signin"><button className='bg-gray-400 gradient'>Sign in</button></Link></p>
           <div> 
