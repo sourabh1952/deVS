@@ -13,7 +13,7 @@ export default function Card({vid,pin,party,val,curr_par,changeParty,pname,voteT
             pin:pin,
             party:party,
             }
-            const res = await axios.post("http://localhost:5001/vote");
+            const res = await axios.post("http://localhost:5001/vote",dataToSend);
             if(res.status==1000){
             toast.error('You have already voted', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
             }

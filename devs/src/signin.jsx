@@ -42,19 +42,24 @@ export default function Signup({vid,changeid,pin,changePin}) {
         vid : vid_,
         pin : pin_
       }
-      const res=await axios.post("http://localhost:5001/signin",dataToSend);
+      axios.post("http://localhost:5001/signin",dataToSend).then(res=>{
       if (res.status==200){
         navigate("/home");
       }
-      else if (res.status==401){
+      
+    })
+    .catch(res=>{
+
+      if (res.response.status==401){
         toast.error('Invalid PIN. Try again', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
       }
-      else if (res.status==404){
+      else if (res.response.status==404){
         toast.error('ID not available. Create an account first', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
       }
       else{
         toast.error('Unexpected error happened. Try again.', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
       }
+    })
 }
 
 

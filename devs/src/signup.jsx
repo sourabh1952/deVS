@@ -74,18 +74,18 @@ console.log(e);
 
       }
       
-    }).catch(response=>{
-      console.log(response);
-      if (response.status==500){
+    }).catch(res=>{
+      console.log(res);
+      if (res.status==500){
         toast.error('Some internal error occured', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
 
       }
-      else if (response.status==400){
+      else if (res.response.status==400){
         console.log("here")
         toast.error('Invalid VID', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
 
       }
-      else if (response.status==401){
+      else if (res.response.status==401){
         toast.error('Account already made. Please sign in', {position: "top-center",autoClose: 5000,hideProgressBar: false,closeOnClick: true,pauseOnHover: false,draggable: true,progress: 0,theme: "colored",transition: Slide,});
 
       }

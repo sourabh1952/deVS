@@ -23,7 +23,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-
+const big_uri="http://172.16.14.216:9984/api/v1/";
 async function connectToMongoDB() {
   try {
     await client.connect();
@@ -51,13 +51,13 @@ connectToMongoDB();
     try {
 
       const result = await client.db("ECL_DATA").collection("ECL_VOTER_DATA").findOne({
-        vid: vid
+        voter_id: vid
       });
       console.log(result);
       if (result) {
         const myIdentity = new driver.Ed25519Keypair();
         const myIdentity1 = new driver.Ed25519Keypair();
-        const conn = new driver.Connection('http://172.16.14.216:9984/api/v1/');
+        const conn = new driver.Connection(big_uri);
         const hash1 = crypto.createHash('sha256').update(id_pass).digest('hex');
         const hash = crypto.createHash('sha256').update(vid).digest('hex');
 
@@ -142,7 +142,7 @@ connectToMongoDB();
     let flag2=0;
   
     try {
-      const conn = new driver.Connection('http://localhost:9984/api/v1/');
+      const conn = new driver.Connection(big_uri);
   
       // Search asset
       await conn.searchAssets('vidDone').then(async assets => {
@@ -161,19 +161,19 @@ connectToMongoDB();
       });
   
       await conn.searchAssets('hashedVidPin').then(async assets => {
-        console.log("there");
         let hashToCheck = hashVidPin; // Replace with the hash you want to check
-  
+        
         // Iterate over the returned assets to find the hash
         let hashExists = assets.some(asset => {
           return asset.data.deVID == hashToCheck; // Assuming 'deVID' is the attribute storing the hash
         });
-  
+        
         if (hashExists) {
           flag2=1;
         }
         
-  
+        
+
         if(flag1 && flag2){
           res.status(200).json({msg: "Login successful"});
         }
@@ -196,15 +196,15 @@ connectToMongoDB();
   
   
   app.post('/vote', async (req, res) => {
-    res.status(200).json({msg: "Vote successful"});
+    // res.status(200).json({msg: "Vote successful"});
     const { vid, pin, party } = req.body;
     const id_pass = vid + pin ;
     const validate_user = vid;
-  
+    console.log(vid, pin, party);
     try {
       const myIdentity = new driver.Ed25519Keypair();
       const myIdentity1 = new driver.Ed25519Keypair();
-      const conn = new driver.Connection('http://localhost:9984/api/v1/');
+      const conn = new driver.Connection(big_uri);
       const hashVidPin = crypto.createHash('sha256').update(id_pass).digest('hex');
       const hashVid = crypto.createHash('sha256').update(validate_user).digest('hex');
   
